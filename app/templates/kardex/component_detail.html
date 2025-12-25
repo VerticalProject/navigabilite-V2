@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Composant{% endblock %}
+{% block page_title %}Détail composant{% endblock %}
+
+{% block top_actions %}
+  <a href="/kardex/components/">
+    <button class="btn">Retour liste</button>
+  </a>
+{% endblock %}
+
+{% block content %}
+
+<!-- HEADER -->
+<div class="card" style="margin-bottom:16px;">
+  <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start;">
+    <div>
+      <div class="kicker">
+        {% if comp.ata %}ATA {{ comp.ata }}{% else %}ATA —{% endif %}
+        {% if comp.category %} · {{ comp.get_category_display }}{% endif %}
+      </div>
+
+      <div class="title" style="font-size:18px; margin-top:6px;">
+        {{ comp.name|default:"Composant" }}
+      </div>
+
+      <div class="meta" style="margin-top:10px;">
+        <div><strong>P/N :</strong> {{ comp.part_number|default:"—" }}</div>
+        <div><strong>S/N :</strong> {{ comp.serial_number|default:"—" }}</div>
+        {% if comp.manufacturer %}
+          <div><strong>Constructeur :</strong> {{ comp.manufacturer }}</div>
+        {% endif %}
+        <div style="margin-top:6px;" class="muted">
+          {{ comp.current_location_str|default:"" }}
+        </div>
+      </div>
+
+      <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+        {% if comp.status == "installed" %}
+          <span class="chip"><span class="dot ok"></span> Installé</span>
+        {% elif comp.status == "in_shop" %}
+          <span class="chip"><span class="dot warn"></span> Maintenance</span>
+        {% elif comp.status == "scrapped" %}
+          <span class="chip"><span class="dot bad"></span> Réformé</span>
+        {% else %}
+          <span class="chip"><span class="dot na"></span> Stock</span>
+        {% endif %}
+
+        {% if alert.level %}
+          {% if alert.level == "RED" %}
+            <span class="chip"><span class="dot bad"></span> Alerte</span>
+          {% elif alert.level == "AMBER" %}
+            <span class="chip"><span class="dot warn"></span> À surveiller</span>
+          {% elif alert.level == "GREEN" %}
+            <span class="chip"><span class="dot ok"></span> OK</span>
+          {% else %}
+            <span class="chip"><span class="dot na"></span> {{ alert.level }}</span>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="row" style="margin-bottom:16px;">
+  <div class="col" style="min-width:220px;">
+    <div class="card">
+      <div class="kicker">TSN</div>
+      <div class="title" style="font-size:18px; margin-top:6px;">
+        {% if tsn_minutes is not None %}{{ tsn_minutes }} min{% else %}—{% endif %}
+      </div>
+      <div class="muted" style="margin-top:6px;">Temps depuis neuf</div>
+    </div>
+  </div>
+
+  <div class="col" style="min-width:220px;">
+    <div class="card">
+      <div class="kicker">CSN</div>
+      <div class="title" style="font-size:18px; margin-top:6px;">
+        {% if csn_cycles is not None %}{{ csn_cycles }}{% else %}—{% endif %}
+      </div>
+      <div class="muted" style="margin-top:6px;">Cycles depuis neuf</div>
+    </div>
+  </div>
+
+  <div class="col" style="min-width:220px;">
+    <div class="card">
+      <div class="kicker">Restant heures</div>
+      <div class="title" style="font-size:18px; margin-top:6px;">
+        {% if alert.rem_minutes is not None %}{{ alert.rem_minutes }} min{% else %}—{% endif %}
+      </div>
+      <div class="muted" style="margin-top:6px;">
+        {% if comp.limit_minutes %}Limite : {{ comp.limit_minutes }} min{% else %}Pas de limite{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col" style="min-width:220px;">
+    <div class="card">
+      <div class="kicker">Restant cycles</div>
+      <div class="title" style="font-size:18px; margin-top:6px;">
+        {% if alert.rem_cycles is not None %}{{ alert.rem_cycles }}{% else %}—{% endif %}
+      </div>
+      <div class="muted" style="margin-top:6px;">
+        {% if comp.limit_cycles %}Limite : {{ comp.limit_cycles }}{% else %}Pas de limite{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row" style="align-items:flex-start;">
+
+  <!-- LEFT -->
+  <div class="col" style="min-width:320px;">
+    {% if can_manage and form %}
+      <div class="card" style="margin-bottom:16px;">
+        <div class="title" style="font-size:16px;">Ajouter un évènement</div>
+
+        <form method="post" style="margin-top:12px;">
+          {% csrf_token %}
+
+          {% for field in form %}
+            <div style="margin-bottom:10px;">
+              <label>{{ field.label }}</label>
+              {{ field }}
+              {% if field.help_text %}
+                <div class="muted">{{ field.help_text }}</div>
+              {% endif %}
+              {% if field.errors %}
+                <div>{{ field.errors }}</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+
+          <button class="btn primary" type="submit">Ajouter</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- RIGHT -->
+  <div class="col">
+    <div class="card">
+      <div class="title" style="font-size:16px;">Historique</div>
+
+      <table class="table" style="width:100%; margin-top:12px;">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Support</th>
+            <th style="text-align:right;">Minutes</th>
+            <th style="text-align:right;">Cycles</th>
+            <th>Remarques</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in entries %}
+            <tr>
+              <td>{{ e.date|default:"—" }}</td>
+              <td>
+                {% if e.engine %}
+                  Moteur {{ e.engine }}
+                {% elif e.aircraft %}
+                  Avion {{ e.aircraft }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td style="text-align:right;">{{ e.minutes|default:"—" }}</td>
+              <td style="text-align:right;">{{ e.cycles|default:"—" }}</td>
+              <td>{{ e.remarks|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" class="muted">Aucun évènement.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+{% endblock content %}

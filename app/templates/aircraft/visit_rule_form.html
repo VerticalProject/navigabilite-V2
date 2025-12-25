@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == "edit" %}Modifier visite{% else %}Nouvelle visite{% endif %}{% endblock %}
+{% block page_heading %}{% if mode == "edit" %}Modifier visite{% else %}Nouvelle visite{% endif %}{% endblock %}
+
+{% block top_actions %}
+  <a href="/aircraft/{{ aircraft.id }}/"><button class="btn">Retour avion</button></a>
+{% endblock %}
+
+{% block content %}
+
+<div class="tile-grid" style="margin-bottom:16px;">
+  <div class="tile wide" style="cursor:default;">
+    <div class="kicker">Aéronef</div>
+    <div class="title">{{ aircraft.registration }}</div>
+    <div class="meta">
+      <div><strong>Type :</strong> {{ aircraft.manufacturer }} {{ aircraft.model }}</div>
+      <div><strong>Organisation :</strong> {{ aircraft.organization }}</div>
+    </div>
+  </div>
+
+  <div class="tile wide" style="cursor:default;">
+    <div class="kicker">Visite programmée</div>
+    <div class="title">{% if mode == "edit" %}Modification{% else %}Création{% endif %}</div>
+    <div class="meta">
+      Saisie en <strong>HH:MM</strong> pour l’intervalle et l’échéance (cellule), + cycles optionnels.
+    </div>
+  </div>
+</div>
+
+<div class="card" style="max-width:980px;">
+  <form method="post">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="flash error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="row">
+      <div class="col">
+        <label>Nom de la visite</label>
+        {{ form.name }}
+        {% if form.name.errors %}<div class="muted" style="color:var(--bad);">{{ form.name.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col">
+        <label>Intervalle (HH:MM)</label>
+        {# selon ton form: interval_hhmm ou interval_minutes (fallback) #}
+        {% if form.interval_hhmm %}{{ form.interval_hhmm }}{% else %}{{ form.interval_minutes }}{% endif %}
+        {% if form.interval_hhmm and form.interval_hhmm.errors %}<div class="muted" style="color:var(--bad);">{{ form.interval_hhmm.errors }}</div>{% endif %}
+        {% if form.interval_minutes and form.interval_minutes.errors %}<div class="muted" style="color:var(--bad);">{{ form.interval_minutes.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col">
+        <label>Intervalle (cycles)</label>
+        {{ form.interval_cycles }}
+        {% if form.interval_cycles.errors %}<div class="muted" style="color:var(--bad);">{{ form.interval_cycles.errors }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px;">
+      <div class="col">
+        <label>Échéance initiale (HH:MM)</label>
+        {# selon ton form: due_at_hhmm ou due_at_minutes (fallback) #}
+        {% if form.due_at_hhmm %}{{ form.due_at_hhmm }}{% else %}{{ form.due_at_minutes }}{% endif %}
+        {% if form.due_at_hhmm and form.due_at_hhmm.errors %}<div class="muted" style="color:var(--bad);">{{ form.due_at_hhmm.errors }}</div>{% endif %}
+        {% if form.due_at_minutes and form.due_at_minutes.errors %}<div class="muted" style="color:var(--bad);">{{ form.due_at_minutes.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col">
+        <label>Échéance initiale (cycles)</label>
+        {{ form.due_at_cycles }}
+        {% if form.due_at_cycles.errors %}<div class="muted" style="color:var(--bad);">{{ form.due_at_cycles.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col">
+        <label>Actif</label>
+        {{ form.active }}
+        {% if form.active.errors %}<div class="muted" style="color:var(--bad);">{{ form.active.errors }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn primary" type="submit">{% if mode == "edit" %}Enregistrer{% else %}Créer{% endif %}</button>
+      <a href="/aircraft/{{ aircraft.id }}/" class="muted" style="align-self:center;">Annuler</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

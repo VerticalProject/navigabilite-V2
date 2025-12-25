@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page">
+  <div class="page-head">
+    <div>
+      <h1>Administration</h1>
+      <p class="muted">Gestion des utilisateurs et des organisations.</p>
+    </div>
+  </div>
+
+  {% if not can_manage %}
+    <div class="card">
+      <p>Tu n’as pas les droits pour accéder à l’administration.</p>
+    </div>
+  {% else %}
+    <div class="tile-grid">
+      {% for t in tiles %}
+        {% if t.enabled %}
+          <a class="tile small" href="{% url t.url %}">
+            <div class="tile-title">{{ t.title }}</div>
+            <div class="tile-subtitle">{{ t.subtitle }}</div>
+            <div class="chip">Ouvrir</div>
+          </a>
+        {% else %}
+          <div class="tile small is-disabled">
+            <div class="tile-title">{{ t.title }}</div>
+            <div class="tile-subtitle">{{ t.subtitle }}</div>
+            <div class="chip">Indisponible</div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Paramètres{% endblock %}
+{% block page_heading %}Paramètres{% endblock %}
+
+{% block content %}
+
+<div class="tile-grid">
+
+  <div class="tile wide" style="cursor:default;">
+    <div class="kicker">Compte</div>
+    <div class="title">Profil</div>
+
+    <div class="meta" style="margin-top:12px;">
+      <div><strong>Nom :</strong> {{ user.get_full_name|default:"—" }}</div>
+      <div><strong>Username :</strong> {{ user.username }}</div>
+      <div><strong>Email :</strong> {{ user.email|default:"—" }}</div>
+      <div><strong>Rôle :</strong> {{ user.get_role_display|default:user.role }}</div>
+      <div><strong>Organisation :</strong> {% if user.organization %}{{ user.organization.name }}{% else %}—{% endif %}</div>
+    </div>
+
+    <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+      <a href="/profile/edit/"><button class="btn primary">Modifier le profil</button></a>
+      <a href="/password/change/"><button>Changer le mot de passe</button></a>
+    </div>
+  </div>
+
+  <div class="tile wide" style="cursor:default;">
+    <div class="kicker">Interface</div>
+    <div class="title">Thème</div>
+
+    <div class="meta" style="margin-top:12px;">
+      Choisis ton thème. Il sera sauvegardé sur ton compte.
+    </div>
+
+    <form method="post" style="margin-top:12px;">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="theme">
+
+      <div class="row">
+        <div class="col">
+          <label>Thème</label>
+          <select name="ui_theme">
+            <option value="dark" {% if user.ui_theme == "dark" %}selected{% endif %}>Sombre</option>
+            <option value="light" {% if user.ui_theme == "light" %}selected{% endif %}>Clair</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <button class="btn primary" type="submit">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+{% endblock %}

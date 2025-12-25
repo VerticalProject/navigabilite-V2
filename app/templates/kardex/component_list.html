@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Parc composants{% endblock %}
+{% block page_title %}Parc composants{% endblock %}
+
+{% block top_actions %}
+  {% if can_manage %}
+    <a href="/kardex/components/create/"><button class="btn primary">Nouveau composant</button></a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="card" style="margin-bottom:16px;">
+  <form method="get">
+    <div class="row">
+      <div class="col" style="min-width:320px;">
+        <label>Recherche (désignation / P/N / S/N / constructeur)</label>
+        <input type="text" name="q" value="{{ q }}" placeholder="Ex: alternator / 123-456 / SN001">
+      </div>
+
+      <div class="col">
+        <label>ATA</label>
+        <select name="ata">
+          <option value="">— Tous —</option>
+          {% for a in ata_values %}
+            <option value="{{ a }}" {% if ata == a %}selected{% endif %}>{{ a }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col">
+        <label>Statut</label>
+        <select name="status">
+          <option value="">— Tous —</option>
+          {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn" type="submit">Filtrer</button>
+      <a class="muted" href="/kardex/components/" style="align-self:center;">Réinitialiser</a>
+    </div>
+  </form>
+</div>
+
+<div class="tile-grid">
+  {% for c in components %}
+    <a class="tile small" href="/kardex/components/{{ c.id }}/">
+      <div class="kicker">
+        {% if c.ata %}ATA {{ c.ata }}{% else %}ATA —{% endif %}
+        · {{ c.get_category_display }}
+      </div>
+
+      <div class="title" style="font-size:16px; margin-top:8px;">{{ c.name }}</div>
+
+      <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+        {% if c.status == "installed" %}
+          <span class="chip"><span class="dot ok"></span> Installé</span>
+        {% elif c.status == "in_shop" %}
+          <span class="chip"><span class="dot warn"></span> Maintenance</span>
+        {% elif c.status == "scrapped" %}
+          <span class="chip"><span class="dot bad"></span> Réformé</span>
+        {% else %}
+          <span class="chip"><span class="dot na"></span> Stock</span>
+        {% endif %}
+      </div>
+
+      <div class="meta" style="margin-top:10px;">
+        <div><strong>P/N :</strong> {{ c.part_number|default:"—" }}</div>
+        <div><strong>S/N :</strong> {{ c.serial_number|default:"—" }}</div>
+        <div style="margin-top:6px;" class="muted">{{ c.current_location_str }}</div>
+      </div>
+    </a>
+  {% empty %}
+    <div class="card muted">Aucun composant trouvé.</div>
+  {% endfor %}
+</div>
+
+{% endblock %}

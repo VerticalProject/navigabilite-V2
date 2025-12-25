@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Mon profil{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Mon profil</h2>
+  <div class="row">
+    <div class="col">
+      {% if user_obj.avatar %}
+        <p><img src="{{ user_obj.avatar.url }}" alt="Avatar" style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:1px solid #1f2937;"></p>
+      {% endif %}
+      <p><strong>Nom d'utilisateur :</strong> {{ user_obj.username }}</p>
+      <p><strong>Nom :</strong> {{ user_obj.first_name }} {{ user_obj.last_name }}</p>
+      <p><strong>Email :</strong> {{ user_obj.email }}</p>
+      <p><strong>Rôle :</strong> {{ user_obj.get_role_display }}</p>
+      <p><strong>Organisation :</strong> {{ user_obj.organization|default:"—" }}</p>
+    </div>
+  </div>
+    <div style="margin-top:12px;">
+    <a href="/profile/edit/"><button>Modifier mon profil</button></a>
+    <a href="/password/change/" style="margin-left:8px;"><button>Changer mon mot de passe</button></a>
+  </div>
+</div>
+{% endblock %}

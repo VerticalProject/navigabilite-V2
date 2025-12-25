@@ -1,0 +1,37 @@
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: navdb
+      POSTGRES_USER: navuser
+      POSTGRES_PASSWORD: navpass
+    volumes:
+      - pgdata:/var/lib/postgresql/data    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U navuser -d navdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  web:
+    build: .
+    command: bash -lc "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/code
+    ports:
+      - "8080:8000"
+    environment:
+      # In production, set a strong, secret value here
+      DJANGO_SECRET_KEY: "change-me-please-very-secret"
+      DJANGO_DEBUG: "1"
+      DJANGO_ALLOWED_HOSTS: "*"
+      DB_NAME: navdb
+      DB_USER: navuser
+      DB_PASSWORD: navpass
+      DB_HOST: db
+      DB_PORT: "5432"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  pgdata:

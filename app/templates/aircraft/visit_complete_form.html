@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Marquer visite réalisée{% endblock %}
+{% block page_heading %}Marquer visite réalisée{% endblock %}
+
+{% block top_actions %}
+  <a href="/aircraft/{{ aircraft.id }}/"><button class="btn">Retour avion</button></a>
+{% endblock %}
+
+{% block content %}
+
+<div class="tile-grid" style="margin-bottom:16px;">
+
+  <div class="tile wide" style="cursor:default;">
+    <div class="kicker">Aéronef</div>
+    <div class="title">{{ aircraft.registration }}</div>
+    <div class="meta">
+      <div><strong>Type :</strong> {{ aircraft.manufacturer }} {{ aircraft.model }}</div>
+      <div><strong>Organisation :</strong> {{ aircraft.organization }}</div>
+    </div>
+  </div>
+
+  <div class="tile wide" style="cursor:default;">
+    <div class="kicker">Visite</div>
+    <div class="title">{{ rule.name }}</div>
+    <div class="meta">
+      <div>
+        <strong>Échéance actuelle :</strong> <strong>{{ due_hhmm }}</strong>
+        {% if rule.due_at_cycles %}<span class="muted"> / {{ rule.due_at_cycles }} cy</span>{% endif %}
+      </div>
+      <div>
+        <strong>Intervalle :</strong> <strong>{{ interval_hhmm }}</strong>
+        {% if rule.interval_cycles %}<span class="muted"> / {{ rule.interval_cycles }} cy</span>{% endif %}
+      </div>
+      <div class="muted" style="margin-top:6px;">Calcul automatique de la prochaine échéance.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="card" style="max-width:980px; margin-bottom:16px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div>
+      <div style="font-weight:900;font-size:18px;">Réalisation</div>
+      <div class="muted">Saisir le total cellule au moment de la réalisation</div>
+    </div>
+    <span class="chip"><span class="dot na"></span> Format HH:MM</span>
+  </div>
+
+  <form method="post" style="margin-top:12px;">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="flash error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="row">
+      <div class="col">
+        <label>Total cellule au moment de la réalisation (HH:MM)</label>
+        {# Ton form actuel a minutes_done_total, pas minutes_done_hhmm #}
+        {{ form.minutes_done_total }}
+        {% if form.minutes_done_total.errors %}<div class="muted" style="color:var(--bad);">{{ form.minutes_done_total.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col">
+        <label>Cycles au moment de la réalisation</label>
+        {{ form.cycles_done_total }}
+        {% if form.cycles_done_total.errors %}<div class="muted" style="color:var(--bad);">{{ form.cycles_done_total.errors }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn primary" type="submit">Valider</button>
+      <a href="/aircraft/{{ aircraft.id }}/" class="muted" style="align-self:center;">Annuler</a>
+    </div>
+  </form>
+</div>
+
+<div class="card" style="max-width:980px;">
+  <div style="font-weight:900;font-size:18px;">Prévisualisation</div>
+  <div class="muted" style="margin-top:4px;">Basé sur les totaux actuels</div>
+
+  <div style="margin-top:12px;">
+    <table>
+      <tbody>
+        <tr>
+          <th style="width:280px;">Total actuel</th>
+          <td><strong>{{ total_hhmm }}</strong></td>
+        </tr>
+        <tr>
+          <th>Échéance actuelle</th>
+          <td><strong>{{ due_hhmm }}</strong></td>
+        </tr>
+        <tr>
+          <th>Retard (si applicable)</th>
+          <td>
+            {% if overdue_hhmm and overdue_hhmm != "00:00" and overdue_hhmm != "00:00:00" %}
+              <span class="chip"><span class="dot bad"></span> {{ overdue_hhmm }}</span>
+            {% else %}
+              <span class="chip"><span class="dot ok"></span> Aucun</span>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <th>Prochaine échéance estimée</th>
+          <td><strong>{{ next_due_hhmm }}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,52 @@
+<div class="card" style="margin-top:16px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <h3>Visites programmées</h3>
+    {% if user.role == 'admin' or user.role == 'superadmin' %}
+      <a href="/aircraft/{{ obj.id }}/visits/create/"><button>Ajouter une visite</button></a>
+    {% endif %}
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Intervalle</th>
+        <th>Échéance (minutes totales)</th>
+        <th>Statut</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in obj.visit_rules.all %}
+        {% with remain=r.due_at_minutes|add:-total_minutes %}
+        <tr>
+          <td>{{ r.name }}</td>
+          <td>
+            {% if r.interval_minutes %}{{ r.interval_minutes|floatformat:0 }} min{% endif %}
+            {% if r.interval_cycles %} / {{ r.interval_cycles }} cy{% endif %}
+          </td>
+          <td>{{ r.due_at_minutes }}</td>
+          <td>
+            {% if remain > 0 %}
+              <span class="muted">Dans {{ remain|floatformat:0 }} min (~{{ remain|divisibleby:60 }})</span>
+            {% elif remain == 0 %}
+              <strong>ÉCHÉANCE</strong>
+            {% else %}
+              <strong style="color:#f87171;">OVERDUE {{ remain|abs }} min</strong>
+            {% endif %}
+          </td>
+          <td>
+            <a href="/fleet/visits/{{ r.id }}/complete/"></a>
+            {% if user.role == 'admin' or user.role == 'superadmin' %}
+              <a href="/fleet/visits/{{ r.id }}/complete/"><button>Marquer réalisé</button></a>
+              <a href="/fleet/visits/{{ r.id }}/edit/" style="margin-left:6px;"><button>Modifier</button></a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endwith %}
+      {% empty %}
+        <tr><td colspan="5" class="muted">Aucune visite configurée.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

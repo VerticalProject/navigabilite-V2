@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == "edit" %}Modifier aéronef{% else %}Nouvel aéronef{% endif %}{% endblock %}
+{% block page_heading %}{% if mode == "edit" %}Modifier aéronef{% else %}Nouvel aéronef{% endif %}{% endblock %}
+
+{% block top_actions %}
+  {% if obj %}
+    <a href="/aircraft/{{ obj.id }}/"><button class="btn">Retour avion</button></a>
+  {% else %}
+    <a href="/aircraft/"><button class="btn">Retour flotte</button></a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="tile-grid" style="margin-bottom:16px;">
+
+  <div class="tile wide" style="cursor:default;">
+    <div class="kicker">Fiche aéronef</div>
+    <div class="title">{% if obj %}{{ obj.registration }}{% else %}Création{% endif %}</div>
+    <div class="meta">
+      Renseigner les informations de base.
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+      <span class="chip"><span class="dot na"></span> Cellule</span>
+      {% if obj %}<span class="chip">ID #{{ obj.id }}</span>{% endif %}
+    </div>
+  </div>
+
+  <div class="tile wide" style="cursor:default;">
+    <div class="kicker">Conseil</div>
+    <div class="title">Qualité des données</div>
+    <div class="meta">
+      Afin de garder un historique propre, évitez de modifier l’immatriculation une fois que des données ont été rentrées dans le journal de vol,
+      des visites programmées ou du kardex.
+    </div>
+  </div>
+
+</div>
+
+<div class="card" style="max-width:1100px;">
+  <form method="post">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="flash error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <!-- IDENTITÉ -->
+    <div style="font-weight:900;font-size:16px;">Identité</div>
+    <div class="muted" style="margin-top:4px;">Immatriculation + description</div>
+    <div style="margin-top:12px;" class="row">
+      <div class="col">
+        <label>Immatriculation</label>
+        {{ form.registration }}
+        {% if form.registration.errors %}<div class="muted" style="color:var(--bad);">{{ form.registration.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col">
+        <label>Catégorie</label>
+        {{ form.category }}
+        {% if form.category.errors %}<div class="muted" style="color:var(--bad);">{{ form.category.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col">
+        <label>MTOW (kg)</label>
+        {{ form.mtow_kg }}
+        {% if form.mtow_kg.errors %}<div class="muted" style="color:var(--bad);">{{ form.mtow_kg.errors }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div style="margin-top:10px;" class="row">
+      <div class="col">
+        <label>Constructeur</label>
+        {{ form.manufacturer }}
+        {% if form.manufacturer.errors %}<div class="muted" style="color:var(--bad);">{{ form.manufacturer.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col">
+        <label>Modèle</label>
+        {{ form.model }}
+        {% if form.model.errors %}<div class="muted" style="color:var(--bad);">{{ form.model.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col">
+        <label>Année</label>
+        {{ form.year }}
+        {% if form.year.errors %}<div class="muted" style="color:var(--bad);">{{ form.year.errors }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div style="margin-top:10px;" class="row">
+      <div class="col">
+        <label>N° de série</label>
+        {{ form.serial_number }}
+        {% if form.serial_number.errors %}<div class="muted" style="color:var(--bad);">{{ form.serial_number.errors }}</div>{% endif %}
+      </div>
+      <div class="col"></div>
+      <div class="col"></div>
+    </div>
+
+    <hr>
+
+    <!-- AFFECTATION -->
+    <div style="font-weight:900;font-size:16px;">Affectation</div>
+    <div class="muted" style="margin-top:4px;">Organisation + propriétaire</div>
+
+    <div style="margin-top:12px;" class="row">
+      <div class="col">
+        <label>Organisation</label>
+        {{ form.organization }}
+        {% if form.organization.errors %}<div class="muted" style="color:var(--bad);">{{ form.organization.errors }}</div>{% endif %}
+      </div>
+
+      <div class="col">
+        <label>Propriétaire (utilisateur)</label>
+        {{ form.owner_user }}
+        {% if form.owner_user.errors %}<div class="muted" style="color:var(--bad);">{{ form.owner_user.errors }}</div>{% endif %}
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- POTENTIEL INITIAL -->
+    <div style="font-weight:900;font-size:16px;">Potentiel initial</div>
+    <div class="muted" style="margin-top:4px;">
+      Base de calcul des totaux cellule — saisie au format <strong>HH:MM</strong>
+    </div>
+
+    <div style="margin-top:12px;" class="row">
+      <div class="col">
+        <label>HDV initiales (HH:MM)</label>
+        {{ form.initial_hhmm }}
+        {% if form.initial_hhmm.errors %}
+          <div class="muted" style="color:var(--bad);">
+            {{ form.initial_hhmm.errors }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col">
+        <label>Cycles initiaux</label>
+        {{ form.initial_cycles }}
+        {% if form.initial_cycles.errors %}
+          <div class="muted" style="color:var(--bad);">
+            {{ form.initial_cycles.errors }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col">
+        <div class="muted" style="margin-top:26px;">
+          Exemple : <strong>1234:30</strong>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}

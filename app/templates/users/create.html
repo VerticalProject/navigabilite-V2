@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Créer un utilisateur{% endblock %}
+{% block content %}
+<div class="card" style="max-width:640px;">
+  <h2>Créer un utilisateur</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Créer</button>
+  </form>
+  <p class="muted" style="margin-top:8px;">
+    Note : si vous êtes <strong>administrateur</strong> (et non super administrateur), l'utilisateur sera automatiquement
+    rattaché à votre organisation.
+  </p>
+</div>
+{% endblock %}

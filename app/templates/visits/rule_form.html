@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == "edit" %}Modifier visite{% else %}Nouvelle visite{% endif %}{% endblock %}
+{% block content %}
+<div class="card" style="max-width:780px;">
+  <h2>{% if mode == "edit" %}Modifier la visite{% else %}Nouvelle visite{% endif %} – {{ aircraft.registration }}</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{% if mode == "edit" %}Enregistrer{% else %}Créer{% endif %}</button>
+    <a href="/aircraft/{{ aircraft.id }}/" style="margin-left:8px;">Annuler</a>
+  </form>
+</div>
+{% endblock %}

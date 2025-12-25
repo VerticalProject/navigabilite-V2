@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Organisations{% endblock %}
+{% block page_title %}Organisations{% endblock %}
+
+{% block top_actions %}
+  <a href="/organizations/create/">
+    <button class="btn primary">Nouvelle organisation</button>
+  </a>
+{% endblock %}
+
+{% block content %}
+
+<div class="tile-grid">
+  {% for o in orgs %}
+    <a class="tile small" href="/organizations/{{ o.id }}/edit/">
+      <div class="kicker">Organisation</div>
+
+      <div class="title" style="font-size:16px; margin-top:8px;">
+        {{ o.name }}
+      </div>
+
+      <div class="meta" style="margin-top:10px;">
+        {% if o.code %}
+          <div><strong>Code :</strong> {{ o.code }}</div>
+        {% endif %}
+        {% if o.city or o.country %}
+          <div class="muted" style="margin-top:6px;">
+            {% if o.city %}{{ o.city }}{% endif %}{% if o.city and o.country %}, {% endif %}{% if o.country %}{{ o.country }}{% endif %}
+          </div>
+        {% else %}
+          <div class="muted" style="margin-top:6px;">—</div>
+        {% endif %}
+      </div>
+
+      <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+        <span class="chip"><span class="dot na"></span> Modifier</span>
+      </div>
+    </a>
+  {% empty %}
+    <div class="card muted">Aucune organisation.</div>
+  {% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% block title %}{{ obj.registration }}{% endblock %}
+{% block page_heading %}{{ obj.registration }}{% endblock %}
+
+{% block top_actions %}
+  {% if user.role == 'admin' or user.role == 'superadmin' %}
+    <a href="/aircraft/{{ obj.id }}/edit/"><button class="btn">Modifier</button></a>
+  {% endif %}
+  <a href="/aircraft/"><button class="btn">Retour flotte</button></a>
+{% endblock %}
+
+{% block content %}
+
+<!-- TOP TILES -->
+<div class="tile-grid" style="margin-bottom:16px;">
+
+  <!-- Identité avion -->
+  <div class="tile wide" style="cursor:default;">
+    <div class="kicker">Aéronef</div>
+    <div class="title">{{ obj.registration }}</div>
+
+    <div class="meta">
+      <div><strong>Type :</strong> {{ obj.manufacturer }} {{ obj.model }}</div>
+      <div><strong>Catégorie :</strong> {{ obj.get_category_display }}</div>
+      <div><strong>Organisation :</strong> {{ obj.organization }}</div>
+      <div>
+        <strong>Propriétaire :</strong>
+        {% if obj.owner_user %}{{ obj.owner_user.get_full_name|default:obj.owner_user.username }}{% else %}—{% endif %}
+      </div>
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+      <span class="chip"><span class="dot na"></span> Cellule</span>
+      <span class="chip">{{ obj.registration }}</span>
+    </div>
+  </div>
+
+  <!-- Totaux cellule -->
+  <div class="tile wide" style="cursor:default;">
+    <div class="kicker">Heures & cycles</div>
+    <div class="title">{{ total_hhmm }} · {{ total_cycles }} cy</div>
+
+    <div class="meta" style="margin-top:12px;">
+      <div><strong>Base :</strong> {{ base_hhmm }} · {{ obj.initial_cycles }} cy</div>
+      <div><strong>Journal :</strong> {{ log_hhmm }} · {{ log_cycles }} cy</div>
+      <div class="muted" style="margin-top:6px;">Affichage au format HH:MM</div>
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+      <span class="chip"><span class="dot ok"></span> Total actuel</span>
+      <span class="chip"><span class="dot na"></span> Cellule (pour l’instant)</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- JOURNAL -->
+<div class="card" style="margin-bottom:16px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div>
+      <div style="font-weight:900;font-size:18px;">Journal de vol</div>
+      <div class="muted">Historique des vols (cellule)</div>
+    </div>
+    {% if can_add_log %}
+      <span class="chip"><span class="dot ok"></span> Ajout autorisé</span>
+    {% else %}
+      <span class="chip"><span class="dot na"></span> Lecture seule</span>
+    {% endif %}
+  </div>
+
+  <div style="margin-top:12px;">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:110px;">Date</th>
+          <th style="width:90px;">De</th>
+          <th style="width:90px;">Vers</th>
+          <th style="width:90px;">Durée</th>
+          <th style="width:70px;">Cycles</th>
+          <th style="width:160px;">Pilote</th>
+          <th>Remarques</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for l in logs %}
+        <tr>
+          <td>{{ l.row.date }}</td>
+          <td>{{ l.row.from_icao|default:"—" }}</td>
+          <td>{{ l.row.to_icao|default:"—" }}</td>
+          <td><strong>{{ l.hh }}:{{ l.mm02 }}</strong></td>
+          <td>{{ l.row.cycles }}</td>
+          <td>{% if l.row.pilot %}{{ l.row.pilot.get_full_name|default:l.row.pilot.username }}{% else %}—{% endif %}</td>
+          <td class="muted">{{ l.row.remarks|default:"" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="muted">Aucune ligne de journal.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if can_add_log %}
+<div class="card" style="margin-bottom:16px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div>
+      <div style="font-weight:900;font-size:18px;">Ajouter une ligne</div>
+      <div class="muted">Saisie durée au format HH:MM</div>
+    </div>
+    <span class="chip"><span class="dot ok"></span> Journal cellule</span>
+  </div>
+
+  <form method="post" action="/aircraft/{{ obj.id }}/log/add/" style="margin-top:12px;">
+    {% csrf_token %}
+
+    <div class="row">
+      <div class="col">
+        <label>Date</label>
+        {{ log_form.date }}
+      </div>
+      <div class="col">
+        <label>Durée (HH:MM)</label>
+        {{ log_form.duration_hhmm }}
+      </div>
+      <div class="col">
+        <label>Cycles</label>
+        {{ log_form.cycles }}
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px;">
+      <div class="col">
+        <label>Départ</label>
+        {{ log_form.from_icao }}
+      </div>
+      <div class="col">
+        <label>Arrivée</label>
+        {{ log_form.to_icao }}
+      </div>
+      <div class="col">
+        <label>Pilote (optionnel)</label>
+        {{ log_form.pilot }}
+      </div>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label>Remarques</label>
+      {{ log_form.remarks }}
+    </div>
+
+    <div style="margin-top:12px;">
+      <button class="btn primary" type="submit">Ajouter</button>
+    </div>
+  </form>
+</div>
+{% endif %}
+
+<!-- VISITES PROGRAMMÉES -->
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div>
+      <div style="font-weight:900;font-size:18px;">Visites programmées</div>
+      <div class="muted">Échéances calculées sur le total actuel</div>
+    </div>
+
+    {% if user.role == 'admin' or user.role == 'superadmin' or user.role == 'camo' %}
+      <a href="/aircraft/{{ obj.id }}/visits/create/"><button class="btn primary">Ajouter une visite</button></a>
+    {% endif %}
+  </div>
+
+  <div style="margin-top:12px;">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:130px;">Nom</th>
+          <th style="width:160px;">Intervalle</th>
+          <th style="width:180px;">Échéance</th>
+          <th style="width:200px;">Statut</th>
+          <th style="width:240px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in visits %}
+          <tr>
+            <td><strong>{{ v.rule.name }}</strong></td>
+            <td class="muted">
+              {% if v.rule.interval_hhmm %}{{ v.rule.interval_hhmm }}{% else %}—{% endif %}
+              {% if v.rule.interval_cycles %} / {{ v.rule.interval_cycles }} cy{% endif %}
+            </td>
+            <td>
+              {% if v.rule.due_at_hhmm %}<strong>{{ v.rule.due_at_hhmm }}</strong>{% else %}—{% endif %}
+              {% if v.rule.due_at_cycles %}<span class="muted"> / {{ v.rule.due_at_cycles }} cy</span>{% endif %}
+            </td>
+            <td>
+              {% if v.status == "ok" %}
+                <span class="chip"><span class="dot ok"></span> Dans {{ v.remain_hhmm }}</span>
+              {% elif v.status == "due" %}
+                <span class="chip"><span class="dot warn"></span> Échéance</span>
+              {% else %}
+                <span class="chip"><span class="dot bad"></span> Dépassé {{ v.overdue_hhmm }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if user.role == 'admin' or user.role == 'superadmin' or user.role == 'camo' %}
+                <a href="/aircraft/visits/{{ v.rule.id }}/complete/"><button class="btn">Marquer réalisé</button></a>
+                <a href="/aircraft/visits/{{ v.rule.id }}/edit/" style="margin-left:6px;"><button class="btn">Modifier</button></a>
+              {% else %}
+                <span class="muted">Lecture seule</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="muted">Aucune visite programmée.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

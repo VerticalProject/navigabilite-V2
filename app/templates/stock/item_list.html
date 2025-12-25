@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Articles | Stock{% endblock %}
+{% block page_heading %}Stock · Articles{% endblock %}
+
+{% block top_actions %}
+  <a class="btn" href="{% url 'stock_home' %}">Retour</a>
+  <a class="btn primary" href="{% url 'stock_item_create' %}">Nouvel article</a>
+{% endblock %}
+
+{% block content %}
+  <div class="card" style="margin-bottom:12px;">
+    <div class="row" style="align-items:flex-end;">
+      <div class="col">
+        <label>Recherche</label>
+        <input id="q" type="text" placeholder="Nom ou SKU..." oninput="filterItems()" />
+      </div>
+      <div class="col">
+        <label>Filtre</label>
+        <select id="active" onchange="filterItems()">
+          <option value="">Tous</option>
+          <option value="1">Actifs</option>
+          <option value="0">Inactifs</option>
+        </select>
+      </div>
+      <div class="col" style="min-width:160px;">
+        <button class="btn" style="width:100%;" onclick="resetFilters()">Réinitialiser</button>
+      </div>
+    </div>
+  </div>
+
+  {% if items %}
+    <div class="tile-grid" id="itemsGrid">
+      {% for it in items %}
+        <div
+          class="tile small"
+          data-name="{{ it.name|lower }}"
+          data-sku="{{ it.sku|default:''|lower }}"
+          data-active="{% if it.is_active %}1{% else %}0{% endif %}"
+        >
+          <div class="kicker">{% if it.sku %}{{ it.sku }}{% else %}—{% endif %}</div>
+          <div class="title" style="font-size:18px;">{{ it.name }}</div>
+
+          <div class="meta">
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+              <span class="chip">
+                <span class="dot {% if it.is_active %}ok{% else %}na{% endif %}"></span>
+                {% if it.is_active %}Actif{% else %}Inactif{% endif %}
+              </span>
+
+              <span class="chip">
+                Unité : {{ it.unit|default:"pc" }}
+              </span>
+
+              <span class="chip">
+                Seuil mini : {{ it.min_qty }} {{ it.unit|default:"pc" }}
+              </span>
+            </div>
+
+            <div class="muted" style="margin-top:10px; font-size:12px;">
+              Organisation : {{ it.organization.name }}
+            </div>
+          </div>
+
+          <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+            <!-- Pas d'édition pour l'instant : on l'ajoutera après -->
+            <a class="btn" href="{% url 'stock_move_create' %}?item={{ it.id }}">Mouvement</a>
+            <a class="btn" href="{% url 'stock_move_list' %}">Journal</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card">
+      <div style="font-weight:800;">Aucun article</div>
+      <div class="muted" style="margin-top:6px;">
+        Commence par créer ton premier article de stock.
+      </div>
+      <div style="margin-top:12px;">
+        <a class="btn primary" href="{% url 'stock_item_create' %}">Créer un article</a>
+      </div>
+    </div>
+  {% endif %}
+
+  <script>
+    function filterItems(){
+      const q = (document.getElementById("q").value || "").trim().toLowerCase();
+      const active = document.getElementById("active").value; // "", "1", "0"
+      const tiles = document.querySelectorAll("#itemsGrid .tile");
+
+      tiles.forEach(t => {
+        const name = t.dataset.name || "";
+        const sku = t.dataset.sku || "";
+        const isActive = t.dataset.active || "";
+
+        const matchQ = !q || name.includes(q) || sku.includes(q);
+        const matchA = !active || active === isActive;
+
+        t.style.display = (matchQ && matchA) ? "" : "none";
+      });
+    }
+
+    function resetFilters(){
+      document.getElementById("q").value = "";
+      document.getElementById("active").value = "";
+      filterItems();
+    }
+  </script>
+{% endblock %}

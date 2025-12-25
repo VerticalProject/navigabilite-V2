@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Utilisateur{% endblock %}
+{% block page_title %}Utilisateur{% endblock %}
+
+{% block top_actions %}
+  <a href="/users/"><button class="btn">Retour liste</button></a>
+{% endblock %}
+
+{% block content %}
+
+<div class="card" style="max-width:720px;">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+    <div>
+      <div class="title" style="font-size:16px;">
+        {% if mode == "create" %}Créer un utilisateur{% else %}Modifier l’utilisateur{% endif %}
+      </div>
+      <div class="muted" style="margin-top:6px;">
+        {% if obj %}{{ obj.get_full_name|default:obj.username }}{% else %}Renseigne les informations, puis valide.{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <form method="post" style="margin-top:14px;">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="card muted" style="margin-bottom:12px;">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <div class="row">
+      {% for field in form %}
+        <div class="col" style="min-width:320px;">
+          <label>{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}
+            <div class="muted" style="margin-top:4px;">{{ field.help_text }}</div>
+          {% endif %}
+          {% if field.errors %}
+            <div style="margin-top:4px;">{{ field.errors }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn primary" type="submit">
+        {% if mode == "create" %}Créer{% else %}Enregistrer{% endif %}
+      </button>
+      <a class="muted" href="/users/" style="align-self:center;">Annuler</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

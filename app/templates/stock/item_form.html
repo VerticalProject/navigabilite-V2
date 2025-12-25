@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Nouvel article | Stock{% endblock %}
+{% block page_heading %}Stock · Nouvel article{% endblock %}
+
+{% block top_actions %}
+  <a class="btn" href="{% url 'stock_item_list' %}">Retour</a>
+{% endblock %}
+
+{% block content %}
+  <div class="card" style="max-width:900px; margin:0 auto;">
+    <div style="font-weight:900; font-size:18px;">Créer un article</div>
+    <div class="muted" style="margin-top:4px;">Le code-barres sera généré automatiquement.</div>
+
+    <hr>
+
+    <form method="post">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="flash error">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="row">
+        <div class="col">
+          <label>Désignation (obligatoire)</label>
+          {{ form.designation }}
+          {% if form.designation.errors %}<div class="muted" style="color:var(--bad);margin-top:6px;">{{ form.designation.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <div class="col">
+          <label>P/N (optionnel)</label>
+          {{ form.pn }}
+        </div>
+        <div class="col">
+          <label>P/N constructeur (optionnel)</label>
+          {{ form.pn_mfr }}
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <div class="col">
+          <label>ATA (optionnel)</label>
+          {{ form.ata }}
+        </div>
+        <div class="col">
+          <label>Actif</label>
+          {{ form.is_active }}
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="row">
+        <div class="col">
+          <label>Emplacements magasin (multi-sélection)</label>
+          {{ form.locations }}
+          <div class="muted" style="font-size:12px;margin-top:6px;">
+            Astuce : Ctrl (Windows) / Cmd (Mac) pour sélectionner plusieurs.
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; display:flex; gap:10px;">
+        <button class="btn primary" type="submit">Enregistrer</button>
+        <a class="btn" href="{% url 'stock_item_list' %}">Annuler</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

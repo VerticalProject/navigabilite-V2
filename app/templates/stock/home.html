@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Stock | NAV{% endblock %}
+{% block page_heading %}Stock{% endblock %}
+
+{% block top_actions %}
+  <a class="btn" href="{% url 'stock_move_create' %}">Nouveau mouvement</a>
+  <a class="btn primary" href="{% url 'stock_item_create' %}">Nouvel article</a>
+{% endblock %}
+
+{% block content %}
+  <div class="tile-grid" style="margin-bottom:12px;">
+    <a class="tile small" href="{% url 'stock_item_list' %}">
+      <div class="kicker">Articles</div>
+      <div class="title">{{ items_count }}</div>
+      <div class="meta">Voir / gérer les articles</div>
+      <div class="chip" style="margin-top:10px;">Ouvrir</div>
+    </a>
+
+    <a class="tile small" href="{% url 'stock_location_list' %}">
+      <div class="kicker">Emplacements</div>
+      <div class="title">{{ locations_count }}</div>
+      <div class="meta">Magasin, atelier, camion…</div>
+      <div class="chip" style="margin-top:10px;">Ouvrir</div>
+    </a>
+
+    <a class="tile small" href="{% url 'stock_move_list' %}">
+      <div class="kicker">Mouvements</div>
+      <div class="title">Journal</div>
+      <div class="meta">Historique entrées / sorties</div>
+      <div class="chip" style="margin-top:10px;">Ouvrir</div>
+    </a>
+
+    <div class="tile wide">
+      <div class="kicker">Alertes</div>
+      <div class="title">Stock bas</div>
+      <div class="meta">
+        {% if low_items %}
+          <table style="margin-top:10px;">
+            <thead>
+              <tr>
+                <th>Article</th>
+                <th>Stock</th>
+                <th>Mini</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for it, total in low_items %}
+                <tr>
+                  <td>{{ it.name }}{% if it.sku %}<div class="muted" style="font-size:12px;">{{ it.sku }}</div>{% endif %}</td>
+                  <td>
+                    <span class="chip">
+                      <span class="dot {% if total <= 0 %}bad{% else %}warn{% endif %}"></span>
+                      {{ total }} {{ it.unit }}
+                    </span>
+                  </td>
+                  <td class="muted">{{ it.min_qty }} {{ it.unit }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="muted" style="margin-top:10px;">Aucune alerte. Tout est au-dessus des seuils.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Flotte{% endblock %}
+{% block page_title %}Flotte{% endblock %}
+
+{% block top_actions %}
+  {% if user.role == 'admin' or user.role == 'superadmin' %}
+    <a href="/aircraft/create/"><button class="btn primary">Nouvel aéronef</button></a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="tile-grid">
+  {% for a in aircraft %}
+    <a class="tile" href="/aircraft/{{ a.id }}/">
+      <div class="kicker">{{ a.organization }}</div>
+
+      <div class="title">{{ a.registration }}</div>
+
+      <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+        {% if a.kardex_level == "overdue" %}
+          <span class="chip"><span class="dot bad"></span> Kardex dépassé</span>
+        {% elif a.kardex_level == "warn" %}
+          <span class="chip"><span class="dot warn"></span> Kardex à surveiller</span>
+        {% elif a.kardex_level == "na" %}
+          <span class="chip"><span class="dot na"></span> Kardex N/A</span>
+        {% else %}
+          <span class="chip"><span class="dot ok"></span> Kardex OK</span>
+        {% endif %}
+
+        <span class="chip">{{ a.get_category_display }}</span>
+      </div>
+
+      <div class="meta">
+        <div><strong>Type :</strong> {{ a.manufacturer }} {{ a.model }}</div>
+        <div>
+          <strong>Propriétaire :</strong>
+          {% if a.owner_user %}{{ a.owner_user.get_full_name|default:a.owner_user.username }}{% else %}—{% endif %}
+        </div>
+      </div>
+    </a>
+  {% empty %}
+    <div class="card muted">Aucun aéronef.</div>
+  {% endfor %}
+</div>
+
+{% endblock %}

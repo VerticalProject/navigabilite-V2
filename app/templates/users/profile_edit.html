@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Modifier mon profil{% endblock %}
+{% block content %}
+<div class="card" style="max-width:640px;">
+  <h2>Modifier mon profil</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label>Prénom</label>
+    {{ form.first_name }}
+    <label>Nom</label>
+    {{ form.last_name }}
+    <label>Email</label>
+    {{ form.email }}
+    <label>Avatar (JPG/PNG, ~2 Mo max)</label>
+    {{ form.avatar }}
+    <button type="submit">Enregistrer</button>
+    <a href="/profile/" style="margin-left:8px;">Annuler</a>
+  </form>
+</div>
+{% endblock %}
